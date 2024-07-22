@@ -1,0 +1,7 @@
+app:
+  mode: "debug" # release, debug, test
+  addr: ":8084"
+  log:
+    path: "./logs"
+db:
+  dsn: root:secret@tcp(localhost:3304)/gincms?charset=utf8mb4&parseTime=True&loc=Local

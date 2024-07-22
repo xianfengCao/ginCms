@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  mysql:
+    image: mysql:8
+    command: mysqld --character-set-server=utf8mb4
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: gincms
+    ports:
+      - "3304:3306"
+    volumes:
+      - ./volumes/mysql/data:/var/lib/mysql
