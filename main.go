@@ -2,6 +2,7 @@ package main
 
 import (
 	"ginCms/handlers"
+	"ginCms/models"
 	"ginCms/utils"
 	"github.com/spf13/viper"
 )
@@ -16,6 +17,8 @@ func main() {
 
 	// 初始化数据库连接
 	utils.InitDB()
+	// 初始化模型
+	models.Init()
 
 	// 初始化路由引擎
 	r := handlers.InitEngine()
