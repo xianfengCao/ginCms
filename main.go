@@ -14,6 +14,9 @@ func main() {
 	// 设置日志
 	utils.SetLogger()
 
+	// 初始化数据库连接
+	utils.InitDB()
+
 	// 初始化路由引擎
 	r := handlers.InitEngine()
 	// 使用logger输出应用日志
