@@ -9,6 +9,8 @@ import (
 func main() {
 	// 解析配置
 	utils.ParseConfig()
+	// 设置应用模式
+	utils.SetMode()
 
 	// 初始化路由引擎
 	r := handlers.InitEngine()
