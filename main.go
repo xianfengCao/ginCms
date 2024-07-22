@@ -1,12 +1,11 @@
 package main
 
 import (
-	"ginCms/handlers/system"
-	"github.com/gin-gonic/gin"
+	"ginCms/handlers"
 )
 
 func main() {
-	r := gin.Default()
-	r.GET("/ping", system.Ping)
+	// 初始化路由引擎
+	r := handlers.InitEngine()
 	r.Run() // 监听并在 0.0.0.0:8080 上启动服务
 }
