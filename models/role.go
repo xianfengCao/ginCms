@@ -1,6 +1,10 @@
 package models
 
-import "ginCms/utils"
+import (
+	"fmt"
+	"ginCms/utils"
+	"strings"
+)
 
 // Role 角色模型
 type Role struct {
@@ -10,6 +14,81 @@ type Role struct {
 	Enabled bool   `gorm:"" json:"enabled"`
 	Weight  int    `gorm:"index;" json:"weight"`
 	Comment string `gorm:"type:text" json:"comment"`
+}
+
+// 通用的查询列表过滤类型
+type RoleFilter struct {
+	// 指针类型表示该字段可以不填
+	// omitempty, 非零值才校验
+	// gt, 字符串长度>0
+	Keyword *string `form:"keyword" binding:"omitempty,gt=0"`
+}
+
+// Clean 整理Filter
+func (f *RoleFilter) Clean() {
+	if f.Keyword == nil {
+		temp := ""
+		f.Keyword = &temp
+	}
+}
+
+// RoleFetchList 查询列表
+// @param assoc bool 是否查询关联
+// @param filter RoleFilter 过滤参数
+// @param sorter Sorter 排序参数
+// @param pager Pager 翻页参数
+// @return []*Role Role列表
+// @return error
+func RoleFetchList(assoc bool, filter RoleFilter, sorter Sorter, pager Pager) ([]*Role, error) {
+	// 初始化query
+	query := utils.DB().Model(&Role{})
+
+	// 1. 过滤
+	if *filter.Keyword != "" {
+		query.Where("`title` LIKE ?", "%"+*filter.Keyword+"%")
+	}
+	// 其他字段过滤
+
+	// 2. 排序
+	query.Order(fmt.Sprintf("`%s` %s", *sorter.SortField, strings.ToUpper(*sorter.SortMethod)))
+
+	// 3. 翻页 offset limit
+	// 在pagesize>0时，才进行翻页
+	if *pager.PageSize > 0 {
+		// 偏移 ==（当前页码 - 1） 乘以 每页记录数
+		offset := (*pager.PageNum - 1) * *pager.PageSize
+		query.Offset(offset).Limit(*pager.PageSize)
+	}
+
+	// 4. 查询
+	var rows []*Role
+	if err := query.Find(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	// 5. 关联查询
+	if assoc {
+	}
+
+	// 返回
+	return rows, nil
+}
+
+// RoleFetchRow 根据条件查询单条
+// assoc 是否查询管理数据
+// where, args 查询条件
+func RoleFetchRow(assoc bool, where any, args ...any) (*Role, error) {
+	// 查询本条
+	row := &Role{}
+	if err := utils.DB().Where(where, args...).First(&row).Error; err != nil {
+		return nil, err
+	}
+
+	// 关联查询
+	if assoc {
+	}
+
+	return row, nil
 }
 
 // 填充数据
