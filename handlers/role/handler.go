@@ -57,7 +57,7 @@ func Delete(ctx *gin.Context) {
 	//log.Println(req)
 
 	// 2. 删除数据
-	rowsNum, err := models.RoleDelete(req.IDList)
+	rowsNum, err := models.RoleDelete(req.IDList, req.Force)
 	if err != nil {
 		// 记录日志
 		utils.Logger().Error(err.Error())
