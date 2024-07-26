@@ -4,6 +4,32 @@ import (
 	"ginCms/models"
 )
 
+// RestoreReq 还原的请求消息
+type RestoreReq struct {
+	IDList []uint `form:"id" binding:"gt=0"`
+}
+
+// DeleteReq 删除的请求消息
+type DeleteReq struct {
+	IDList []uint `form:"id" binding:"gt=0"`
+}
+
+// 添加请求消息
+type AddReq struct {
+	models.Role
+	// 需要额外校验的字段
+	Title string `json:"title" binding:"required"`
+	Key   string `json:"key" binding:"required"`
+}
+
+// AddReq to Role
+func (req AddReq) ToRole() *models.Role {
+	row := req.Role
+	row.Title = req.Title
+	row.Key = req.Key
+	return &row
+}
+
 // GetRowReq GetRow接口的请求消息类型
 type GetRowReq struct {
 	// required, 必须的

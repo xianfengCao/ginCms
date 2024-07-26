@@ -12,6 +12,13 @@ type Model struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
+// 查询范围的常量
+const (
+	SCOPE_ALL = iota
+	SCOPE_UNDELETED
+	SCOPE_DELETED
+)
+
 // 通用的查询列表排序类型
 type Sorter struct {
 	// 排序字段

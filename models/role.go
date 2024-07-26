@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"ginCms/utils"
+	"gorm.io/gorm"
 	"strings"
 )
 
@@ -14,6 +15,66 @@ type Role struct {
 	Enabled bool   `gorm:"" json:"enabled"`
 	Weight  int    `gorm:"index;" json:"weight"`
 	Comment string `gorm:"type:text" json:"comment"`
+}
+
+// RoleRestore 还原
+func RoleRestore(idList []uint) (int64, error) {
+	// 还原的记录数
+	rowsNum := int64(0)
+	err := utils.DB().Transaction(func(tx *gorm.DB) error {
+		result := tx.Model(&Role{}).Unscoped().Where("`id` IN ?", idList).Update("deleted_at", nil)
+		if result.Error != nil {
+			return result.Error
+		} else {
+			// 更新成功
+			rowsNum = result.RowsAffected
+		}
+		return nil
+	})
+
+	return rowsNum, err
+}
+
+// RoleDelete 角色删除
+// @return 删除的记录数，error
+func RoleDelete(idList []uint) (int64, error) {
+	// 将delete操作在事务里完成，删除时，有时会涉及到关联数据的处理
+	rowsNum := int64(0)
+	err := utils.DB().Transaction(func(tx *gorm.DB) error {
+		result := tx.Delete(&Role{}, idList)
+		if result.Error != nil {
+			return result.Error
+		} else {
+			// 删除成功
+			rowsNum = result.RowsAffected
+		}
+		return nil
+	})
+
+	return rowsNum, err
+}
+
+//func RoleDelete(idList []uint) error {
+//	// 将delete操作在事务里完成，删除时，有时会涉及到关联数据的处理
+//	return utils.DB().Transaction(func(tx *gorm.DB) error {
+//		if err := tx.Delete(&Role{}, idList).Error; err != nil {
+//			return err
+//		}
+//		return nil
+//	})
+//}
+
+// 角色插入
+func RoleInsert(row *Role) error {
+	// 将insert操作在事务里完成，插入时，有时会涉及到关联数据的处理。
+	// 数据及关联数据的插入，放在一个事务中
+	return utils.DB().Transaction(func(tx *gorm.DB) error {
+		// 完成插入
+		if err := tx.Create(&row).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 // 通用的查询列表过滤类型
@@ -33,17 +94,30 @@ func (f *RoleFilter) Clean() {
 }
 
 // RoleFetchList 查询列表
-// @param assoc bool 是否查询关联
 // @param filter RoleFilter 过滤参数
 // @param sorter Sorter 排序参数
 // @param pager Pager 翻页参数
+// @param scope uint8 范围参数
+// @param assoc bool 是否查询关联
 // @return []*Role Role列表
 // @return error
-func RoleFetchList(assoc bool, filter RoleFilter, sorter Sorter, pager Pager) ([]*Role, error) {
+func RoleFetchList(filter RoleFilter, sorter Sorter, pager Pager, scope uint8, assoc bool) ([]*Role, error) {
 	// 初始化query
 	query := utils.DB().Model(&Role{})
 
 	// 1. 过滤
+	// 查询范围
+	switch scope {
+	case SCOPE_ALL:
+		query.Unscoped()
+	case SCOPE_DELETED:
+		query.Unscoped().Where("`deleted_at` IS NOT NULL")
+	case SCOPE_UNDELETED:
+		fallthrough
+	default:
+		// do nothing. default case
+	}
+	// 条件过滤
 	if *filter.Keyword != "" {
 		query.Where("`title` LIKE ?", "%"+*filter.Keyword+"%")
 	}
@@ -72,6 +146,10 @@ func RoleFetchList(assoc bool, filter RoleFilter, sorter Sorter, pager Pager) ([
 
 	// 返回
 	return rows, nil
+}
+
+func RoleFetch(id uint, assoc bool) (*Role, error) {
+	return RoleFetchRow(assoc, "`id` = ?", id)
 }
 
 // RoleFetchRow 根据条件查询单条
