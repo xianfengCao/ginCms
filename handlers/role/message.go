@@ -34,33 +34,33 @@ type EditBodyReq struct {
 	Comment *string `json:"comment" field:"comment"`
 }
 
-// ToFieldMap 将请求转换为存在字段的map
 func (req EditBodyReq) ToFieldMap() models.FieldMap {
-	fieldMap := models.FieldMap{}
+	// 1. 初始化map
+	m := models.FieldMap{}
 
-	// 利用reflect遍历结构体，进而判断是否为nil，进行map构建
-	rType := reflect.TypeOf(req)
-	rValue := reflect.ValueOf(req)
-	for i, l := 0, rType.NumField(); i < l; i++ {
-		// 获取每个结构的字段类型
-		tf := rType.Field(i)
-		fieldTag := tf.Tag.Get("field")
-		// 未指定field tag的字段，不做自动化处理
+	// 2. 利用反射来遍历req结构的全部字段
+	reqType := reflect.TypeOf(req)
+	reqValue := reflect.ValueOf(req)
+	// 通过字段数量，进行遍历
+	for i, nums := 0, reqType.NumField(); i < nums; i++ {
+		// 获取 field tag
+		fieldTag := reqType.Field(i).Tag.Get("field")
+		// 存在 field tag才自动处理
 		if fieldTag == "" {
 			continue
 		}
-		vf := rValue.Field(i)
-		// 字段的值不是nil
-		if !vf.IsNil() {
-			//// 特定的字段，也不做自动化处理
-			//if fieldTag == "some_filed" {
-			//	continue
-			//}
-			fieldMap[fieldTag] = vf.Elem().Interface()
+		// 判断字段是否为nil，这个值的判断
+		if !reqValue.Field(i).IsNil() {
+			if fieldTag == "some_field" {
+				// 考虑特殊字段的处理情况
+			} else {
+				// 放入map
+				m[fieldTag] = reqValue.Field(i).Elem().Interface()
+			}
 		}
 	}
 
-	return fieldMap
+	return m
 }
 
 // RestoreReq 还原的请求消息

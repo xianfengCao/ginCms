@@ -19,5 +19,6 @@ func Router(r *gin.Engine) {
 	// 更新单条
 	g.PUT(":id", Edit) // PUT /role/33
 	// 更新多条的enabled
-	g.PUT("/enabled", EditEnabled) // PUT /role?id=11&id=22
+	g.PUT("enabled", EditEnabled) // PUT /role?id=11&id=22
+
 }

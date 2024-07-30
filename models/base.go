@@ -12,6 +12,8 @@ type Model struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
+// key: 字段名
+// value: 字段值
 type FieldMap = map[string]any
 
 // 查询范围的常量

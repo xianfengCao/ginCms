@@ -34,7 +34,6 @@ func RoleUpdateEnabled(idList []uint, enabled bool) (int64, error) {
 	return rowsNum, err
 }
 
-// RoleUpdates 更新某个模型的部分字段
 func RoleUpdates(fieldMap FieldMap, id uint) error {
 	return utils.DB().Transaction(func(tx *gorm.DB) error {
 		// 完成更新

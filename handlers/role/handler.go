@@ -4,6 +4,7 @@ import (
 	"ginCms/models"
 	"ginCms/utils"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 )
 
@@ -85,21 +86,22 @@ func Edit(ctx *gin.Context) {
 	}
 	//log.Println(body)
 
-	// 3. 更新数据
+	// 3. req to map
 	fieldMap := body.ToFieldMap()
 	//log.Println(fieldMap)
 	if err := models.RoleUpdates(fieldMap, uri.ID); err != nil {
 		// 记录日志
+		log.Println(err)
 		utils.Logger().Error(err.Error())
 		// 直接响应
 		ctx.JSON(http.StatusOK, gin.H{
 			"code":    100,
-			"message": err.Error(),
+			"message": "数据更新错误",
 		})
 		return
 	}
 
-	// 4. 响应
+	// 3. 响应
 	// 往往需要重新查询一边，获取最新的role信息
 	row, err := models.RoleFetch(uri.ID, false)
 	if err != nil {
