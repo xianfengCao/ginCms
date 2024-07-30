@@ -17,6 +17,34 @@ type Role struct {
 	Comment string `gorm:"type:text" json:"comment"`
 }
 
+// RoleUpdateEnabled 更新多个字段的Enabled值
+func RoleUpdateEnabled(idList []uint, enabled bool) (int64, error) {
+	rowsNum := int64(0)
+	err := utils.DB().Transaction(func(tx *gorm.DB) error {
+		result := tx.Model(&Role{}).Where("`id` IN ?", idList).Update("enabled", enabled)
+		if result.Error != nil {
+			return result.Error
+		} else {
+			// 更新成功
+			rowsNum = result.RowsAffected
+		}
+		return nil
+	})
+
+	return rowsNum, err
+}
+
+// RoleUpdates 更新某个模型的部分字段
+func RoleUpdates(fieldMap FieldMap, id uint) error {
+	return utils.DB().Transaction(func(tx *gorm.DB) error {
+		// 完成更新
+		if err := tx.Model(&Role{}).Where("`id` = ?", id).Updates(fieldMap).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
 // RoleRestore 还原
 func RoleRestore(idList []uint) (int64, error) {
 	// 还原的记录数

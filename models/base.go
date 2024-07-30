@@ -12,6 +12,8 @@ type Model struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
+type FieldMap = map[string]any
+
 // 查询范围的常量
 const (
 	SCOPE_ALL = iota

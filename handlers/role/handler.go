@@ -7,6 +7,117 @@ import (
 	"net/http"
 )
 
+func EditEnabled(ctx *gin.Context) {
+	// 1. 解析Query请求数据
+	query := EditEnabledQueryReq{}
+	if err := ctx.ShouldBindQuery(&query); err != nil {
+		// 记录日志
+		utils.Logger().Error(err.Error())
+		// 直接响应
+		ctx.JSON(http.StatusOK, gin.H{
+			"code":    100,
+			"message": err.Error(),
+		})
+		return
+	}
+	//log.Println(query)
+
+	// 2. 解析Body请求数据
+	body := EditEnabledBodyReq{}
+	if err := ctx.ShouldBind(&body); err != nil {
+		// 记录日志
+		utils.Logger().Error(err.Error())
+		// 直接响应
+		ctx.JSON(http.StatusOK, gin.H{
+			"code":    100,
+			"message": err.Error(),
+		})
+		return
+	}
+	//log.Println(body)
+
+	// 3. 更新数据
+	rowsNum, err := models.RoleUpdateEnabled(query.IDList, body.Enabled)
+	if err != nil {
+		// 记录日志
+		utils.Logger().Error(err.Error())
+		// 直接响应
+		ctx.JSON(http.StatusOK, gin.H{
+			"code":    100,
+			"message": "数据更新错误",
+		})
+		return
+	}
+
+	// 4. 响应
+	ctx.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"data": rowsNum,
+	})
+}
+
+func Edit(ctx *gin.Context) {
+	// 1. 解析URI请求数据
+	uri := EditUriReq{}
+	if err := ctx.ShouldBindUri(&uri); err != nil {
+		// 记录日志
+		utils.Logger().Error(err.Error())
+		// 直接响应
+		ctx.JSON(http.StatusOK, gin.H{
+			"code":    100,
+			"message": err.Error(),
+		})
+		return
+	}
+	//log.Println(uri)
+
+	// 2. 解析Body请求数据
+	body := EditBodyReq{}
+	if err := ctx.ShouldBind(&body); err != nil {
+		// 记录日志
+		utils.Logger().Error(err.Error())
+		// 直接响应
+		ctx.JSON(http.StatusOK, gin.H{
+			"code":    100,
+			"message": err.Error(),
+		})
+		return
+	}
+	//log.Println(body)
+
+	// 3. 更新数据
+	fieldMap := body.ToFieldMap()
+	//log.Println(fieldMap)
+	if err := models.RoleUpdates(fieldMap, uri.ID); err != nil {
+		// 记录日志
+		utils.Logger().Error(err.Error())
+		// 直接响应
+		ctx.JSON(http.StatusOK, gin.H{
+			"code":    100,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	// 4. 响应
+	// 往往需要重新查询一边，获取最新的role信息
+	row, err := models.RoleFetch(uri.ID, false)
+	if err != nil {
+		// 记录日志
+		utils.Logger().Error(err.Error())
+		// 直接响应
+		ctx.JSON(http.StatusOK, gin.H{
+			"code":    100,
+			"message": "查询错误",
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"code": 100,
+		"data": row,
+	})
+}
+
 func Restore(ctx *gin.Context) {
 	// 1. 解析请求数据
 	req := RestoreReq{}

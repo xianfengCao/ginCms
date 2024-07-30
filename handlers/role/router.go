@@ -16,4 +16,8 @@ func Router(r *gin.Engine) {
 	g.GET("recycle", Recycle) // GET /role/recycle?
 	// 回收站还原
 	g.PUT("restore", Restore) // PUT /role?id=22&id=33&id=44
+	// 更新单条
+	g.PUT(":id", Edit) // PUT /role/33
+	// 更新多条的enabled
+	g.PUT("/enabled", EditEnabled) // PUT /role?id=11&id=22
 }
